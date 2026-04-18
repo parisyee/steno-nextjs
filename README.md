@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# steno-nextjs
 
-## Getting Started
+Web client for the [Steno](../steno-cloud) transcription system. Upload audio or video from the browser, browse the transcription history, and run full-text search against the backend's Postgres index.
 
-First, run the development server:
+Sibling to `steno-ios` and `steno-cloud` in the `parisyee/steno` org.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## How it fits in
+
+```
+Browser ──────► Next.js route handlers (/api/*)
+                       │  (adds Authorization: Bearer STENO_API_KEY)
+                       ▼
+              Steno Cloud Run API ──► Gemini + Supabase
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The `STENO_API_KEY` bearer token is held server-side and never shipped to the browser. All client calls go through `/api/transcribe`, `/api/transcriptions`, and `/api/search`, which proxy to the Cloud Run backend.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Next.js 16 (App Router) + React 19 + TypeScript
+- Tailwind v4 + shadcn/ui (Radix primitives, lucide icons)
+- `sonner` for toasts
 
-## Learn More
+## Local development
 
-To learn more about Next.js, take a look at the following resources:
+### Requirements
+- Node.js >= 20.9 (Next.js 16 requirement)
+- npm
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Setup
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm install
+cp .env.example .env.local
+# fill in STENO_API_KEY in .env.local
+npm run dev
+```
 
-## Deploy on Vercel
+Open http://localhost:3000.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Environment variables
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Name | Required | Description |
+|---|---|---|
+| `STENO_API_URL` | yes | Base URL of the Steno API (e.g. `https://steno-836899141951.us-central1.run.app`) |
+| `STENO_API_KEY` | yes* | Bearer token. Optional only if the backend was started with `STENO_API_KEY` unset. |
+
+Both are read in `src/lib/server.ts` and used exclusively by the route handlers under `src/app/api/`.
+
+## Project layout
+
+```
+src/
+├── app/
+│   ├── layout.tsx            # root layout + <Toaster/>
+│   ├── page.tsx              # main screen (upload + list + search)
+│   └── api/
+│       ├── transcribe/route.ts       # POST proxy (multipart passthrough)
+│       ├── transcriptions/route.ts   # GET proxy
+│       └── search/route.ts           # GET proxy
+├── components/
+│   ├── UploadCard.tsx        # drop target + file picker
+│   ├── TranscriptionList.tsx
+│   ├── TranscriptionItem.tsx # row with expand + copy
+│   ├── SearchBar.tsx         # debounced query
+│   └── ui/                   # shadcn primitives
+├── lib/
+│   ├── api.ts                # client → /api/* wrappers
+│   ├── server.ts             # stenoFetch helper (server-only)
+│   └── utils.ts              # cn()
+└── types/
+    └── transcription.ts      # shared types matching backend JSON
+```
+
+## Scripts
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Start the dev server |
+| `npm run build` | Production build |
+| `npm run start` | Serve the production build |
+| `npm run lint` | ESLint |
+
+## Out of scope (for now)
+
+- Delete transcription (the backend doesn't expose a `DELETE` endpoint)
+- Per-user auth (the backend is single-token)
+- In-browser recording (iOS still uses the Voice Memos share flow)
+- Deployment config (decide once local is working)
