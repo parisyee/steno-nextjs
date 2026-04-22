@@ -38,3 +38,13 @@ export async function searchTranscriptions(
   const res = await fetch(`/api/search?${qs.toString()}`);
   return asJson<SearchResponse>(res);
 }
+
+export async function deleteTranscription(id: string): Promise<void> {
+  const res = await fetch(`/api/transcriptions/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(text || `Delete failed: ${res.status}`);
+  }
+}

@@ -8,9 +8,15 @@ interface TranscriptionListProps {
   items: Transcription[];
   loading: boolean;
   emptyMessage: string;
+  onDeleted: (id: string) => void;
 }
 
-export function TranscriptionList({ items, loading, emptyMessage }: TranscriptionListProps) {
+export function TranscriptionList({
+  items,
+  loading,
+  emptyMessage,
+  onDeleted,
+}: TranscriptionListProps) {
   if (loading && items.length === 0) {
     return (
       <div className="flex flex-col gap-3">
@@ -32,7 +38,7 @@ export function TranscriptionList({ items, loading, emptyMessage }: Transcriptio
   return (
     <div className="flex flex-col gap-3">
       {items.map((t) => (
-        <TranscriptionItem key={t.id} transcription={t} />
+        <TranscriptionItem key={t.id} transcription={t} onDeleted={onDeleted} />
       ))}
     </div>
   );

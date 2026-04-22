@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { SearchBar } from "@/components/SearchBar";
@@ -90,6 +90,12 @@ export default function Page() {
     setOffset((prev) => prev + 1);
   }
 
+  const handleDeleted = useCallback((id: string) => {
+    setItems((prev) => prev.filter((t) => t.id !== id));
+    setSearchResults((prev) => prev.filter((t) => t.id !== id));
+    setOffset((prev) => Math.max(0, prev - 1));
+  }, []);
+
   const showSearch = query.length > 0;
 
   return (
@@ -110,6 +116,7 @@ export default function Page() {
           items={searchResults}
           loading={searchLoading}
           emptyMessage={searchLoading ? "Searching…" : `No matches for "${query}"`}
+          onDeleted={handleDeleted}
         />
       ) : (
         <>
@@ -117,6 +124,7 @@ export default function Page() {
             items={items}
             loading={listLoading}
             emptyMessage="No transcriptions yet"
+            onDeleted={handleDeleted}
           />
           {hasMore && !listLoading && (
             <div className="flex justify-center">

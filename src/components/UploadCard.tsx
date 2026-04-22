@@ -23,13 +23,8 @@ export function UploadCard({ onUploaded }: UploadCardProps) {
     setUploading(true);
     const toastId = toast.loading(`Transcribing ${file.name}…`);
     try {
-      const { id, text } = await uploadTranscription(file);
-      onUploaded({
-        id,
-        text,
-        filename: file.name,
-        created_at: new Date().toISOString(),
-      });
+      const transcription = await uploadTranscription(file);
+      onUploaded(transcription);
       toast.success("Transcription complete", { id: toastId });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Upload failed";
