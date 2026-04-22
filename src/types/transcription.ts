@@ -1,15 +1,10 @@
-export interface Cleaned {
-  light: string | null;
-  polished: string | null;
-}
-
 export interface Transcription {
   id: string;
   filename: string | null;
   title: string | null;
   description: string | null;
   text: string;
-  cleaned: Cleaned | null;
+  cleaned_polished: string | null;
   created_at: string;
 }
 
@@ -29,8 +24,6 @@ export function displayTitle(t: Transcription): string {
   return "Untitled";
 }
 
-export function hasCleanedVariants(t: Transcription): boolean {
-  const c = t.cleaned;
-  if (!c) return false;
-  return Boolean((c.light && c.light.length > 0) || (c.polished && c.polished.length > 0));
+export function hasPolishedVariant(t: Transcription): boolean {
+  return Boolean(t.cleaned_polished && t.cleaned_polished.length > 0);
 }

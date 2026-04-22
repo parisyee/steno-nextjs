@@ -19,14 +19,13 @@ import { cn, formatRelative } from "@/lib/utils";
 import {
   type Transcription,
   displayTitle,
-  hasCleanedVariants,
+  hasPolishedVariant,
 } from "@/types/transcription";
 
-type Variant = "raw" | "light" | "polished";
+type Variant = "raw" | "polished";
 
 const VARIANT_LABEL: Record<Variant, string> = {
   raw: "Raw",
-  light: "Light",
   polished: "Polished",
 };
 
@@ -96,19 +95,16 @@ function TranscriptionDetailDialog({
 
   const availableVariants: Variant[] = useMemo(() => {
     const v: Variant[] = ["raw"];
-    if (transcription.cleaned?.light) v.push("light");
-    if (transcription.cleaned?.polished) v.push("polished");
+    if (transcription.cleaned_polished) v.push("polished");
     return v;
-  }, [transcription.cleaned]);
+  }, [transcription.cleaned_polished]);
 
-  const showVariantPicker = hasCleanedVariants(transcription) && availableVariants.length > 1;
+  const showVariantPicker = hasPolishedVariant(transcription) && availableVariants.length > 1;
 
   const currentText =
     variant === "raw"
       ? transcription.text
-      : variant === "light"
-        ? (transcription.cleaned?.light ?? transcription.text)
-        : (transcription.cleaned?.polished ?? transcription.text);
+      : (transcription.cleaned_polished ?? transcription.text);
 
   async function copy() {
     await navigator.clipboard.writeText(currentText);
