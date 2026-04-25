@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, Copy, Loader2, Trash2 } from "lucide-react";
+import { Check, Copy, Download, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { DownloadDialog } from "@/components/DownloadDialog";
 import { deleteTranscription } from "@/lib/api";
 import { cn, formatRelative } from "@/lib/utils";
 import {
@@ -89,6 +90,7 @@ function TranscriptionDetailDialog({
   const [copied, setCopied] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [downloadOpen, setDownloadOpen] = useState(false);
 
   const title = displayTitle(transcription);
   const created = new Date(transcription.created_at);
@@ -214,14 +216,25 @@ function TranscriptionDetailDialog({
                 <Trash2 className="size-3.5" />
                 Delete
               </Button>
-              <Button variant="outline" size="sm" onClick={copy}>
-                {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-                {copied ? "Copied" : "Copy"}
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => setDownloadOpen(true)}>
+                  <Download className="size-3.5" />
+                  Download
+                </Button>
+                <Button variant="outline" size="sm" onClick={copy}>
+                  {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+                  {copied ? "Copied" : "Copy"}
+                </Button>
+              </div>
             </>
           )}
         </DialogFooter>
       </DialogContent>
+      <DownloadDialog
+        open={downloadOpen}
+        onOpenChange={setDownloadOpen}
+        transcription={transcription}
+      />
     </Dialog>
   );
 }
