@@ -14,12 +14,22 @@ interface UploadCardProps {
   onUploaded: (t: Transcription) => void;
 }
 
+// Cloud Run's managed ingress caps request bodies at 32 MB; 25 MB leaves
+// headroom for multipart overhead. Larger files need the signed-URL/GCS
+// upload path (not yet implemented).
+const MAX_FILE_BYTES = 25 * 1024 * 1024;
+const MAX_FILE_LABEL = "25 MB";
+
 export function UploadCard({ onUploaded }: UploadCardProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [dragging, setDragging] = useState(false);
 
   async function handleFile(file: File) {
+    if (file.size > MAX_FILE_BYTES) {
+      toast.error(`File too large. Maximum size is ${MAX_FILE_LABEL}.`);
+      return;
+    }
     setUploading(true);
     const toastId = toast.loading(`Transcribing ${file.name}…`);
     try {
@@ -63,7 +73,7 @@ export function UploadCard({ onUploaded }: UploadCardProps) {
             {uploading ? "Uploading…" : "Drop an audio or video file"}
           </p>
           <p className="text-sm text-muted-foreground">
-            .m4a, .mp3, .wav, .mp4, .mov, and more
+            .m4a, .mp3, .wav, .mp4, .mov, and more &mdash; up to {MAX_FILE_LABEL}
           </p>
         </div>
         <input
