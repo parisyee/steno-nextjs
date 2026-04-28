@@ -2,7 +2,7 @@
 
 Web client for the [Steno](../steno-cloud) transcription system. Upload audio or video from the browser, browse the transcription history, and run full-text search against the backend's Postgres index.
 
-Sibling to `steno-ios` and `steno-cloud` in the `parisyee/steno` org.
+Sibling to `steno-ios` and `steno-cloud` in the `parisyee/steno` org. For cloud provisioning (GCP, Supabase, IAM, secrets) see [`steno-cloud/INFRASTRUCTURE.md`](../steno-cloud/INFRASTRUCTURE.md).
 
 ## How it fits in
 
