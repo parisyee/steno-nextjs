@@ -9,11 +9,14 @@ Sibling to `steno-ios` and `steno-cloud` in the `parisyee/steno` org.
 ```
 Browser ──────► Next.js route handlers (/api/*)
                        │  (adds Authorization: Bearer STENO_API_KEY)
+                       │  (streams body straight through; no buffering)
                        ▼
               Steno Cloud Run API ──► Gemini + Supabase
 ```
 
 The `STENO_API_KEY` bearer token is held server-side and never shipped to the browser. All client calls go through `/api/transcribe`, `/api/transcriptions`, and `/api/search`, which proxy to the Cloud Run backend.
+
+The `/api/transcribe` proxy pipes `request.body` directly into the upstream fetch with `duplex: "half"` so multi-GB uploads don't get buffered in the Next.js process. The upload cap is 2 GB (Gemini's File API limit), enforced both client-side in [`UploadCard`](src/components/UploadCard.tsx) and via `Content-Length` in the proxy route.
 
 ## Stack
 
@@ -55,7 +58,7 @@ src/
 │   ├── layout.tsx            # root layout + <Toaster/>
 │   ├── page.tsx              # main screen (upload + list + search)
 │   └── api/
-│       ├── transcribe/route.ts       # POST proxy (multipart passthrough)
+│       ├── transcribe/route.ts       # POST proxy (streams body to upstream, up to 2 GB)
 │       ├── transcriptions/route.ts   # GET proxy
 │       └── search/route.ts           # GET proxy
 ├── components/

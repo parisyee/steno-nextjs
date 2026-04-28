@@ -14,11 +14,10 @@ interface UploadCardProps {
   onUploaded: (t: Transcription) => void;
 }
 
-// Cloud Run's managed ingress caps request bodies at 32 MB; 25 MB leaves
-// headroom for multipart overhead. Larger files need the signed-URL/GCS
-// upload path (not yet implemented).
-const MAX_FILE_BYTES = 25 * 1024 * 1024;
-const MAX_FILE_LABEL = "25 MB";
+// Server caps uploads at 2 GB (Gemini File API limit). With Cloud Run's
+// HTTP/2 ingress the old 32 MB HTTP/1.1 cap no longer applies.
+const MAX_FILE_BYTES = 2 * 1024 * 1024 * 1024;
+const MAX_FILE_LABEL = "2 GB";
 
 export function UploadCard({ onUploaded }: UploadCardProps) {
   const inputRef = useRef<HTMLInputElement>(null);
